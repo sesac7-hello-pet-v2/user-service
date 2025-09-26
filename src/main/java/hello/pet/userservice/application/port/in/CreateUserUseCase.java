@@ -1,9 +1,9 @@
 package hello.pet.userservice.application.port.in;
 
-import hello.pet.userservice.adapter.in.web.dto.RegisterUserRequest;
 import hello.pet.userservice.adapter.in.web.dto.RegisterUserResponse;
-import jakarta.validation.Valid;
+import hello.pet.userservice.application.port.in.command.RegisterUserCommand;
+import hello.pet.userservice.application.port.out.result.RegisterUserResult;
 
 public interface CreateUserUseCase {
-    RegisterUserResponse register(@Valid RegisterUserRequest req);
+    RegisterUserResult register(RegisterUserCommand cmd);
 }

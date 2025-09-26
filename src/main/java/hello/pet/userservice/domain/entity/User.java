@@ -30,7 +30,7 @@ public class User {
     @AttributeOverride(name = "value", column = @Column(name = "password_value"))
     private Password password;
 
-    @Column(unique = true)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
@@ -38,6 +38,14 @@ public class User {
     @AttributeOverride(name = "value", column = @Column(name = "activation_value"))
     private UserActivation activation;
 
+    @Getter
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserDetail userDetail;
+
+    public void linkUserDetail(UserDetail ud) {
+        this.userDetail = ud;
+        if (ud != null) {
+            ud.linkUser(this);
+        }
+    }
 }
