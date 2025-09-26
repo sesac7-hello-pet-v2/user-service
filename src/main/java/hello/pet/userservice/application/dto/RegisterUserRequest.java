@@ -1,0 +1,70 @@
+package hello.pet.userservice.application.dto;
+
+import hello.pet.userservice.domain.entity.User;
+import hello.pet.userservice.domain.entity.UserDetail;
+import hello.pet.userservice.domain.entity.UserRole;
+import hello.pet.userservice.domain.vo.Nickname;
+import hello.pet.userservice.domain.vo.Password;
+import hello.pet.userservice.domain.vo.PhoneNumber;
+import hello.pet.userservice.domain.vo.UserActivation;
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+
+public record RegisterUserRequest(
+        @NotBlank(message = "사용자 이름은 필수입니다")
+        @Email(message = "유효한 이메일 형식이어야 합니다")
+        String email,
+
+        @Getter
+        @NotBlank(message = "비밀번호는 필수입니다")
+        @Size(min = 6, message = "비밀번호는 최소 6자 이상이어야 합니다")
+        @Pattern(
+                regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).+$",
+                message = "비밀번호는 영문자, 숫자, 특수문자를 각각 최소 한 개씩 포함해야 합니다."
+        )
+        String password,
+
+        @NotNull(message = "사용자 권한은 필수입니다")
+        UserRole role,
+
+        @NotBlank(message = "닉네임은 필수입니다")
+        @Pattern(
+                regexp = "^[가-힣]{2,}$|^[A-Za-z]{5,}$",
+                message = "닉네임은 한글 2자 이상 또는 영문 5자 이상이어야 합니다."
+        )
+        String nickname,
+
+        @NotBlank(message = "사용자 이름은 필수입니다")
+        @Size(min = 2, max = 10, message = "사용자 이름은 2-10자 사이여야 합니다")
+        String username,
+
+        @NotBlank(message = "주소는 필수입니다")
+        String address,
+
+        @NotBlank(message = "사용자 전화번호는 필수입니다")
+        @Pattern(
+                regexp = "^\\d{10,11}$",
+                message = "휴대폰 번호는 숫자 10자리 또는 11자리여야 합니다."
+        )
+        String phoneNumber,
+        String userProfileUrl
+) {
+    public User toEntity(String encodedPassword) {
+        User user = new User(
+                null,
+                new hello.pet.userservice.domain.vo.Email(email),
+                new Password(encodedPassword),
+                role,
+                new UserActivation(true),
+                null);
+        UserDetail ud = new UserDetail(
+                null,
+                new Nickname(nickname),
+                userProfileUrl,
+                address,
+                new PhoneNumber(phoneNumber),
+                user
+        );
+        return user;
+    }
+}
