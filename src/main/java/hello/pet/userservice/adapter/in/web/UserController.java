@@ -1,19 +1,17 @@
 package hello.pet.userservice.adapter.in.web;
 
-import hello.pet.userservice.adapter.in.web.dto.RegisterUserRequest;
-import hello.pet.userservice.adapter.in.web.dto.RegisterUserResponse;
+import hello.pet.userservice.adapter.in.web.dto.*;
+import hello.pet.userservice.application.port.in.command.UniqueCheckCommand;
 import hello.pet.userservice.application.port.in.command.RegisterUserCommand;
 import hello.pet.userservice.application.port.in.CreateUserUseCase;
+import hello.pet.userservice.application.port.out.result.UniqueCheckResult;
 import hello.pet.userservice.application.port.out.result.RegisterUserResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -30,5 +28,14 @@ public class UserController {
         RegisterUserResponse res = RegisterUserResponse.from(result);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
+    }
+
+    @GetMapping("/exist")
+    public ResponseEntity<UniqueCheckResponse> checkUnique(@RequestBody UniqueCheckRequest req) {
+        UniqueCheckCommand cmd = UniqueCheckRequest.toCommand(req);
+        UniqueCheckResult result =  createUserUseCase.isUnique(cmd);
+        UniqueCheckResponse res = UniqueCheckResponse.from(result);
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 }
