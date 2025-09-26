@@ -1,7 +1,7 @@
 package hello.pet.userservice.application.service;
 
-import hello.pet.userservice.application.dto.RegisterUserRequest;
-import hello.pet.userservice.application.dto.RegisterUserResponse;
+import hello.pet.userservice.adapter.in.web.dto.RegisterUserRequest;
+import hello.pet.userservice.adapter.in.web.dto.RegisterUserResponse;
 import hello.pet.userservice.application.port.in.CreateUserUseCase;
 import hello.pet.userservice.application.port.out.UserRepository;
 import lombok.RequiredArgsConstructor;

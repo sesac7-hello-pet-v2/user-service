@@ -1,4 +1,4 @@
-package hello.pet.userservice.application.dto;
+package hello.pet.userservice.adapter.in.web.dto;
 
 import hello.pet.userservice.domain.entity.User;
 import hello.pet.userservice.domain.entity.UserDetail;

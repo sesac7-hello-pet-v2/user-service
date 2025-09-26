@@ -1,6 +1,6 @@
 package hello.pet.userservice.adapter.out.persistence;
 
-import hello.pet.userservice.application.dto.RegisterUserResponse;
+import hello.pet.userservice.adapter.in.web.dto.RegisterUserResponse;
 import hello.pet.userservice.application.port.out.UserRepository;
 import hello.pet.userservice.domain.entity.User;
 import lombok.RequiredArgsConstructor;
