@@ -1,9 +1,10 @@
 package hello.pet.userservice.application.service;
 
-import hello.pet.userservice.adapter.in.web.dto.RegisterUserResponse;
+import hello.pet.userservice.application.port.in.command.UniqueCheckCommand;
 import hello.pet.userservice.application.port.in.command.RegisterUserCommand;
 import hello.pet.userservice.application.port.in.CreateUserUseCase;
 import hello.pet.userservice.application.port.out.UserRepository;
+import hello.pet.userservice.application.port.out.result.UniqueCheckResult;
 import hello.pet.userservice.application.port.out.result.RegisterUserResult;
 import hello.pet.userservice.domain.entity.User;
 import hello.pet.userservice.domain.entity.UserDetail;
@@ -29,6 +30,13 @@ public class UserService implements CreateUserUseCase {
         User savedUser = userRepository.save(user);
         log.info("유저가 등록 되었습니다! 새로운 유저의 id: {}", savedUser.getId());
         return RegisterUserResult.from(savedUser);
+    }
+
+    @Override
+    public UniqueCheckResult isUnique(UniqueCheckCommand cmd) {
+        boolean exist = userRepository.findByField(cmd.field(), cmd.value());
+        String message = exist ? "이미 사용중인 " + cmd.field() + "입니다." : "사용 가능한 " + cmd.field() + "입니다.";
+        return new UniqueCheckResult(cmd.field(), cmd.value(), !exist, message);
     }
 
     private User createUser(RegisterUserCommand cmd) {
