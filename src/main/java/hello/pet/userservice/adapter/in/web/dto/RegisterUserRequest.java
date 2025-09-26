@@ -1,12 +1,7 @@
-package hello.pet.userservice.application.dto;
+package hello.pet.userservice.adapter.in.web.dto;
 
-import hello.pet.userservice.domain.entity.User;
-import hello.pet.userservice.domain.entity.UserDetail;
+import hello.pet.userservice.application.port.in.command.RegisterUserCommand;
 import hello.pet.userservice.domain.entity.UserRole;
-import hello.pet.userservice.domain.vo.Nickname;
-import hello.pet.userservice.domain.vo.Password;
-import hello.pet.userservice.domain.vo.PhoneNumber;
-import hello.pet.userservice.domain.vo.UserActivation;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 
@@ -25,7 +20,7 @@ public record RegisterUserRequest(
         String password,
 
         @NotNull(message = "사용자 권한은 필수입니다")
-        UserRole role,
+        String role,
 
         @NotBlank(message = "닉네임은 필수입니다")
         @Pattern(
@@ -49,22 +44,16 @@ public record RegisterUserRequest(
         String phoneNumber,
         String userProfileUrl
 ) {
-    public User toEntity(String encodedPassword) {
-        User user = new User(
-                null,
-                new hello.pet.userservice.domain.vo.Email(email),
-                new Password(encodedPassword),
+    public RegisterUserCommand toCommand() {
+        return new RegisterUserCommand(
+                email,
+                password,
                 role,
-                new UserActivation(true),
-                null);
-        UserDetail ud = new UserDetail(
-                null,
-                new Nickname(nickname),
-                userProfileUrl,
+                nickname,
+                username,
                 address,
-                new PhoneNumber(phoneNumber),
-                user
+                phoneNumber,
+                userProfileUrl
         );
-        return user;
     }
 }

@@ -5,6 +5,7 @@ import hello.pet.userservice.domain.vo.PhoneNumber;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -16,6 +17,7 @@ public class UserDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
     @Column(unique = true)
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "nickname_value"))
@@ -34,4 +36,8 @@ public class UserDetail {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public void linkUser(User user) {
+        this.user = user;
+    }
 }
