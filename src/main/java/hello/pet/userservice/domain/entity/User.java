@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Table(name = "users")
@@ -30,6 +31,7 @@ public class User {
     @AttributeOverride(name = "value", column = @Column(name = "password_value"))
     private Password password;
 
+    @Getter
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UserRole role;
@@ -47,5 +49,9 @@ public class User {
         if (ud != null) {
             ud.linkUser(this);
         }
+    }
+
+    public boolean isPasswordMatched(String rawPassword, PasswordEncoder encoder) {
+        return encoder.matches(rawPassword, this.password.value());
     }
 }
