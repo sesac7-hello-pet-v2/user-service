@@ -23,6 +23,7 @@ public class UserDetail {
     @AttributeOverride(name = "value", column = @Column(name = "nickname_value"))
     private Nickname nickname;
 
+    @Getter
     private String userProfileUrl;
 
     @Column(nullable = false)

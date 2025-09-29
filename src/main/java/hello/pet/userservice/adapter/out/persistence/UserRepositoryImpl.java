@@ -1,6 +1,7 @@
 package hello.pet.userservice.adapter.out.persistence;
 
 import hello.pet.userservice.adapter.in.web.dto.UniqueField;
+import hello.pet.userservice.application.exception.UserNotFoundException;
 import hello.pet.userservice.application.port.out.UserRepository;
 import hello.pet.userservice.domain.entity.User;
 import hello.pet.userservice.domain.vo.Email;
@@ -8,6 +9,8 @@ import hello.pet.userservice.domain.vo.Nickname;
 import hello.pet.userservice.domain.vo.PhoneNumber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -28,5 +31,10 @@ public class UserRepositoryImpl implements UserRepository {
             case NICKNAME -> jpaUserDetailRepository.existsByNickname(new Nickname(value));
             case PHONE -> jpaUserDetailRepository.existsByPhoneNumber(new PhoneNumber(value));
         };
+    }
+
+    @Override
+    public Optional<User> findByEmail(String value) {
+        return jpaUserRepository.findByEmail(new Email(value));
     }
 }
