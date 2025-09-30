@@ -1,5 +1,6 @@
 package hello.pet.userservice.application.service;
 
+import hello.pet.userservice.adapter.in.web.dto.UniqueField;
 import hello.pet.userservice.application.exception.PasswordNotMatchedException;
 import hello.pet.userservice.application.exception.UserNotFoundException;
 import hello.pet.userservice.application.port.in.ValidateUserUseCase;
@@ -20,8 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,6 +31,7 @@ public class UserService implements CreateUserUseCase, ValidateUserUseCase {
 
     @Override
     public RegisterUserResult register(RegisterUserCommand cmd) {
+        validateUniqueness(cmd);
 
         User user = createUser(cmd);
         User savedUser = userRepository.save(user);
@@ -44,6 +44,27 @@ public class UserService implements CreateUserUseCase, ValidateUserUseCase {
         boolean exist = userRepository.findByField(cmd.field(), cmd.value());
         String message = exist ? "이미 사용중인 " + cmd.field() + "입니다." : "사용 가능한 " + cmd.field() + "입니다.";
         return new UniqueCheckResult(cmd.field(), cmd.value(), !exist, message);
+    }
+
+    @Override
+    public LoginValidationResult validate(LoginValidationCommand cmd) {
+        try {
+
+            User user = userRepository.findByEmail(cmd.email())
+                    .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
+
+            if (!user.isPasswordMatched(cmd.password(), passwordEncoder)) {
+                throw new PasswordNotMatchedException("비밀번호가 일치하지 않습니다.");
+            }
+
+            log.info("유저 로그인 성공! user id: {}", user.getId());
+
+            return LoginValidationResult.success(user);
+        } catch (UserNotFoundException e){
+            return LoginValidationResult.fail("등록된 유저가 없습니다.");
+        } catch (PasswordNotMatchedException e) {
+            return LoginValidationResult.fail("비밀번호가 일치하지 않습니다.");
+        }
     }
 
     private User createUser(RegisterUserCommand cmd) {
@@ -73,22 +94,16 @@ public class UserService implements CreateUserUseCase, ValidateUserUseCase {
         return user;
     }
 
-    @Override
-    public LoginValidationResult validate(LoginValidationCommand cmd) {
-        try {
+    private void validateUniqueness(RegisterUserCommand cmd) {
+        checkUnique(UniqueField.EMAIL, cmd.email());
+        checkUnique(UniqueField.NICKNAME, cmd.nickname());
+        checkUnique(UniqueField.PHONE, cmd.phoneNumber());
+    }
 
-            User user = userRepository.findByEmail(cmd.email())
-                    .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
-
-            if (!user.isPasswordMatched(cmd.password(), passwordEncoder)) {
-                throw new PasswordNotMatchedException("비밀번호가 일치하지 않습니다.");
-            }
-
-            return LoginValidationResult.success(user);
-        } catch (UserNotFoundException e){
-            return LoginValidationResult.fail("등록된 유저가 없습니다.");
-        } catch (PasswordNotMatchedException e) {
-            return LoginValidationResult.fail("비밀번호가 일치하지 않습니다.");
+    private void checkUnique(UniqueField field, String value) {
+        UniqueCheckResult result = isUnique(new UniqueCheckCommand(field, value));
+        if (!result.isUnique()) {
+            throw new IllegalArgumentException(result.message());
         }
     }
 }

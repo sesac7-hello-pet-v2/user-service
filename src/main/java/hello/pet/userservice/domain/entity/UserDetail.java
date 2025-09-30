@@ -26,6 +26,7 @@ public class UserDetail {
     @Getter
     private String userProfileUrl;
 
+    @Getter
     @Column(nullable = false)
     private String address;
 
