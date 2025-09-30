@@ -31,8 +31,9 @@ public class UserController {
     }
 
     @GetMapping("/exist")
-    public ResponseEntity<UniqueCheckResponse> checkUnique(@RequestBody UniqueCheckRequest req) {
-        UniqueCheckCommand cmd = UniqueCheckRequest.toCommand(req);
+    public ResponseEntity<UniqueCheckResponse> checkUnique(@RequestParam("field") String field,
+                                                           @RequestParam("value") String value) {
+        UniqueCheckCommand cmd = UniqueCheckRequest.toCommand(field, value);
         UniqueCheckResult result =  createUserUseCase.isUnique(cmd);
         UniqueCheckResponse res = UniqueCheckResponse.from(result);
 

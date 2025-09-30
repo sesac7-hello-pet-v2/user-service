@@ -6,7 +6,8 @@ public record UniqueCheckRequest(
         UniqueField field,
         String value
 ) {
-    public static UniqueCheckCommand toCommand(UniqueCheckRequest request) {
-        return new UniqueCheckCommand(request.field(), request.value());
+
+    public static UniqueCheckCommand toCommand(String field, String value) {
+        return new UniqueCheckCommand(UniqueField.valueOf(field), value);
     }
 }
