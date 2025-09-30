@@ -54,4 +54,8 @@ public class User {
     public boolean isPasswordMatched(String rawPassword, PasswordEncoder encoder) {
         return encoder.matches(rawPassword, this.password.value());
     }
+
+    public void inActivate() {
+        this.activation = activation.inActivate();
+    }
 }

@@ -11,4 +11,6 @@ public interface UserRepository {
     boolean findByField(UniqueField field, String value);
 
     Optional<User> findByEmail(String email);
+
+    Optional<User> findById(Long userId);
 }

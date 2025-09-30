@@ -3,6 +3,7 @@ package hello.pet.userservice.application.service;
 import hello.pet.userservice.adapter.in.web.dto.UniqueField;
 import hello.pet.userservice.application.exception.PasswordNotMatchedException;
 import hello.pet.userservice.application.exception.UserNotFoundException;
+import hello.pet.userservice.application.port.in.DeleteUserUseCase;
 import hello.pet.userservice.application.port.in.ValidateUserUseCase;
 import hello.pet.userservice.application.port.in.command.LoginValidationCommand;
 import hello.pet.userservice.application.port.in.command.UniqueCheckCommand;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserService implements CreateUserUseCase, ValidateUserUseCase {
+public class UserService implements CreateUserUseCase, ValidateUserUseCase, DeleteUserUseCase {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -105,5 +106,31 @@ public class UserService implements CreateUserUseCase, ValidateUserUseCase {
         if (!result.isUnique()) {
             throw new IllegalArgumentException(result.message());
         }
+    }
+
+    @Override
+    public boolean checkPassword(Long userId, String password) {
+        log.info("유저 패스워드 체크! user id: {}", userId);
+
+        if (userId == null) {
+            throw new IllegalArgumentException("헤더에 X-User-Id가 없습니다.");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
+
+        log.info("유저 패스워드 체크 완료! user id: {}", userId);
+        return user.isPasswordMatched(password, passwordEncoder);
+    }
+
+    @Override
+    public void deleteUser(Long userId) {
+        log.info("유저 삭제! user id: {}", userId);
+        if (userId == null) {
+            throw new IllegalArgumentException("헤더에 X-User-Id가 없습니다.");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
+        user.inActivate();
+        log.info("유저 삭제 완료! user id: {}", userId);
     }
 }
