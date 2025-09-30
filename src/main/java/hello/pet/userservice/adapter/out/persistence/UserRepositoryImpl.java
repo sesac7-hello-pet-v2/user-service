@@ -1,7 +1,6 @@
 package hello.pet.userservice.adapter.out.persistence;
 
 import hello.pet.userservice.adapter.in.web.dto.UniqueField;
-import hello.pet.userservice.application.exception.UserNotFoundException;
 import hello.pet.userservice.application.port.out.UserRepository;
 import hello.pet.userservice.domain.entity.User;
 import hello.pet.userservice.domain.vo.Email;
@@ -36,5 +35,10 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<User> findByEmail(String value) {
         return jpaUserRepository.findByEmail(new Email(value));
+    }
+
+    @Override
+    public Optional<User> findById(Long userId) {
+        return jpaUserRepository.findById(userId);
     }
 }
