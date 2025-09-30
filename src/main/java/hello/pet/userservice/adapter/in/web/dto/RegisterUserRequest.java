@@ -24,8 +24,8 @@ public record RegisterUserRequest(
 
         @NotBlank(message = "닉네임은 필수입니다")
         @Pattern(
-                regexp = "^[가-힣]{2,}$|^[A-Za-z]{5,}$",
-                message = "닉네임은 한글 2자 이상 또는 영문 5자 이상이어야 합니다."
+                regexp = "^[가-힣a-zA-Z0-9]{2,10}$",
+                message = "닉네임은 한글, 영문, 숫자 조합으로 2-10자여야 합니다."
         )
         String nickname,
 
