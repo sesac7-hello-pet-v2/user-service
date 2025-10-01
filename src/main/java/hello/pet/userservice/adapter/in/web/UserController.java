@@ -3,10 +3,13 @@ package hello.pet.userservice.adapter.in.web;
 import hello.pet.userservice.adapter.in.web.dto.*;
 import hello.pet.userservice.application.port.in.CreateUserUseCase;
 import hello.pet.userservice.application.port.in.DeleteUserUseCase;
+import hello.pet.userservice.application.port.in.ReadUserUseCase;
+import hello.pet.userservice.application.port.in.command.ReadUserCommand;
 import hello.pet.userservice.application.port.in.command.RegisterUserCommand;
 import hello.pet.userservice.application.port.in.command.UniqueCheckCommand;
 import hello.pet.userservice.application.port.out.result.RegisterUserResult;
 import hello.pet.userservice.application.port.out.result.UniqueCheckResult;
+import hello.pet.userservice.application.port.out.result.UserDetailResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +22,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/users")
 @RequiredArgsConstructor
 public class UserController {
+
+    private final ReadUserUseCase readUserUseCase;
     private final CreateUserUseCase  createUserUseCase;
     private final DeleteUserUseCase deleteUserUseCase;
+
+
+    @GetMapping
+    public ResponseEntity<UserDetailResponse> getUserDetail(@RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        ReadUserCommand cmd = new ReadUserCommand(userId);
+        UserDetailResult result = readUserUseCase.getUserDetail(cmd);
+        UserDetailResponse res = UserDetailResponse.from(result);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
 
     @PostMapping
     public ResponseEntity<RegisterUserResponse> registerUser(@Valid @RequestBody RegisterUserRequest req) {

@@ -2,17 +2,22 @@ package hello.pet.userservice.application.service;
 
 import hello.pet.userservice.adapter.in.web.dto.UniqueField;
 import hello.pet.userservice.application.exception.PasswordNotMatchedException;
+import hello.pet.userservice.application.exception.UserDetailNotFoundException;
+import hello.pet.userservice.application.exception.UserIdHeaderNotFoundException;
 import hello.pet.userservice.application.exception.UserNotFoundException;
+import hello.pet.userservice.application.port.in.CreateUserUseCase;
 import hello.pet.userservice.application.port.in.DeleteUserUseCase;
+import hello.pet.userservice.application.port.in.ReadUserUseCase;
 import hello.pet.userservice.application.port.in.ValidateUserUseCase;
 import hello.pet.userservice.application.port.in.command.LoginValidationCommand;
-import hello.pet.userservice.application.port.in.command.UniqueCheckCommand;
+import hello.pet.userservice.application.port.in.command.ReadUserCommand;
 import hello.pet.userservice.application.port.in.command.RegisterUserCommand;
-import hello.pet.userservice.application.port.in.CreateUserUseCase;
+import hello.pet.userservice.application.port.in.command.UniqueCheckCommand;
 import hello.pet.userservice.application.port.out.UserRepository;
 import hello.pet.userservice.application.port.out.result.LoginValidationResult;
-import hello.pet.userservice.application.port.out.result.UniqueCheckResult;
 import hello.pet.userservice.application.port.out.result.RegisterUserResult;
+import hello.pet.userservice.application.port.out.result.UniqueCheckResult;
+import hello.pet.userservice.application.port.out.result.UserDetailResult;
 import hello.pet.userservice.domain.entity.User;
 import hello.pet.userservice.domain.entity.UserDetail;
 import hello.pet.userservice.domain.entity.UserRole;
@@ -25,7 +30,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserService implements CreateUserUseCase, ValidateUserUseCase, DeleteUserUseCase {
+public class UserService implements CreateUserUseCase, ValidateUserUseCase, DeleteUserUseCase, ReadUserUseCase {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -83,6 +88,7 @@ public class UserService implements CreateUserUseCase, ValidateUserUseCase, Dele
 
         UserDetail ud = new UserDetail(
                 null,
+                cmd.username(),
                 new Nickname(cmd.nickname()),
                 cmd.userProfileUrl(),
                 cmd.address(),
@@ -113,7 +119,7 @@ public class UserService implements CreateUserUseCase, ValidateUserUseCase, Dele
         log.info("유저 패스워드 체크! user id: {}", userId);
 
         if (userId == null) {
-            throw new IllegalArgumentException("헤더에 X-User-Id가 없습니다.");
+            throw new UserIdHeaderNotFoundException("헤더에 X-User-Id가 없습니다.");
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
@@ -126,11 +132,33 @@ public class UserService implements CreateUserUseCase, ValidateUserUseCase, Dele
     public void deleteUser(Long userId) {
         log.info("유저 삭제! user id: {}", userId);
         if (userId == null) {
-            throw new IllegalArgumentException("헤더에 X-User-Id가 없습니다.");
+            throw new UserIdHeaderNotFoundException("헤더에 X-User-Id가 없습니다.");
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
         user.inActivate();
         log.info("유저 삭제 완료! user id: {}", userId);
+    }
+
+    @Override
+    public UserDetailResult getUserDetail(ReadUserCommand cmd) {
+        log.info("유저 상세 정보 조회! user id: {}", cmd.userId());
+
+        if (cmd.userId() == null) {
+            throw new UserIdHeaderNotFoundException("헤더에 X-User-Id가 없습니다.");
+        }
+
+        User user = userRepository.findById(cmd.userId())
+                .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
+
+        log.info("유저 상세 정보 조회 완료! user id: {}", cmd.userId());
+
+        UserDetail ud = user.getUserDetail();
+
+        if (ud == null) {
+            throw new UserDetailNotFoundException("유저 상세 정보가 없습니다.");
+        }
+
+        return UserDetailResult.from(user, ud);
     }
 }
