@@ -5,14 +5,8 @@ import hello.pet.userservice.application.exception.PasswordNotMatchedException;
 import hello.pet.userservice.application.exception.UserDetailNotFoundException;
 import hello.pet.userservice.application.exception.UserIdHeaderNotFoundException;
 import hello.pet.userservice.application.exception.UserNotFoundException;
-import hello.pet.userservice.application.port.in.CreateUserUseCase;
-import hello.pet.userservice.application.port.in.DeleteUserUseCase;
-import hello.pet.userservice.application.port.in.ReadUserUseCase;
-import hello.pet.userservice.application.port.in.ValidateUserUseCase;
-import hello.pet.userservice.application.port.in.command.LoginValidationCommand;
-import hello.pet.userservice.application.port.in.command.ReadUserCommand;
-import hello.pet.userservice.application.port.in.command.RegisterUserCommand;
-import hello.pet.userservice.application.port.in.command.UniqueCheckCommand;
+import hello.pet.userservice.application.port.in.*;
+import hello.pet.userservice.application.port.in.command.*;
 import hello.pet.userservice.application.port.out.UserRepository;
 import hello.pet.userservice.application.port.out.result.LoginValidationResult;
 import hello.pet.userservice.application.port.out.result.RegisterUserResult;
@@ -30,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserService implements CreateUserUseCase, ValidateUserUseCase, DeleteUserUseCase, ReadUserUseCase {
+public class UserService implements CreateUserUseCase, ReadUserUseCase, UpdateUserUseCase, DeleteUserUseCase, ValidateUserUseCase{
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -43,6 +37,71 @@ public class UserService implements CreateUserUseCase, ValidateUserUseCase, Dele
         User savedUser = userRepository.save(user);
         log.info("유저가 등록 되었습니다! 새로운 유저의 id: {}", savedUser.getId());
         return RegisterUserResult.from(savedUser);
+    }
+
+    @Override
+    public UserDetailResult getUserDetail(ReadUserCommand cmd) {
+        log.info("유저 상세 정보 조회! user id: {}", cmd.userId());
+
+        if (cmd.userId() == null) {
+            throw new UserIdHeaderNotFoundException("헤더에 X-User-Id가 없습니다.");
+        }
+
+        User user = userRepository.findById(cmd.userId())
+                .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
+
+        log.info("유저 상세 정보 조회 완료! user id: {}", cmd.userId());
+
+        UserDetail ud = user.getUserDetail();
+
+        if (ud == null) {
+            throw new UserDetailNotFoundException("유저 상세 정보가 없습니다.");
+        }
+
+        return UserDetailResult.from(user, ud);
+    }
+
+    @Override
+    public UserDetailResult updateUserDetail(UpdateUserDetailCommand cmd) {
+        log.info("유저 상세 정보 수정! user id: {}", cmd.userId());
+
+        if (cmd.userId() == null) {
+            throw new UserIdHeaderNotFoundException("헤더에 X-User-Id가 없습니다.");
+        }
+
+        User user = userRepository.findById(cmd.userId())
+                .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
+
+        UserDetail ud = user.getUserDetail();
+
+        if (ud == null) {
+            throw new UserDetailNotFoundException("유저 상세 정보가 없습니다.");
+        }
+
+        ud.update(
+                cmd.nickname(),
+                cmd.address(),
+                cmd.userProfileUrl()
+        );
+
+        log.info("유저 상세 정보 수정 완료! user id: {}", cmd.userId());
+        return UserDetailResult.from(user, ud);
+    }
+
+    @Override
+    public void deleteUser(Long userId) {
+        log.info("유저 삭제! user id: {}", userId);
+
+        if (userId == null) {
+            throw new UserIdHeaderNotFoundException("헤더에 X-User-Id가 없습니다.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
+
+        user.inActivate();
+
+        log.info("유저 삭제 완료! user id: {}", userId);
     }
 
     @Override
@@ -121,6 +180,7 @@ public class UserService implements CreateUserUseCase, ValidateUserUseCase, Dele
         if (userId == null) {
             throw new UserIdHeaderNotFoundException("헤더에 X-User-Id가 없습니다.");
         }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
 
@@ -128,37 +188,4 @@ public class UserService implements CreateUserUseCase, ValidateUserUseCase, Dele
         return user.isPasswordMatched(password, passwordEncoder);
     }
 
-    @Override
-    public void deleteUser(Long userId) {
-        log.info("유저 삭제! user id: {}", userId);
-        if (userId == null) {
-            throw new UserIdHeaderNotFoundException("헤더에 X-User-Id가 없습니다.");
-        }
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
-        user.inActivate();
-        log.info("유저 삭제 완료! user id: {}", userId);
-    }
-
-    @Override
-    public UserDetailResult getUserDetail(ReadUserCommand cmd) {
-        log.info("유저 상세 정보 조회! user id: {}", cmd.userId());
-
-        if (cmd.userId() == null) {
-            throw new UserIdHeaderNotFoundException("헤더에 X-User-Id가 없습니다.");
-        }
-
-        User user = userRepository.findById(cmd.userId())
-                .orElseThrow(() -> new UserNotFoundException("등록된 유저가 없습니다."));
-
-        log.info("유저 상세 정보 조회 완료! user id: {}", cmd.userId());
-
-        UserDetail ud = user.getUserDetail();
-
-        if (ud == null) {
-            throw new UserDetailNotFoundException("유저 상세 정보가 없습니다.");
-        }
-
-        return UserDetailResult.from(user, ud);
-    }
 }
