@@ -47,4 +47,10 @@ public class UserDetail {
     public void linkUser(User user) {
         this.user = user;
     }
+
+    public void update(String nickname, String address, String userProfileUrl) {
+        this.nickname = new Nickname(nickname);
+        this.address = address;
+        this.userProfileUrl = userProfileUrl;
+    }
 }
