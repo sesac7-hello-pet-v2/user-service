@@ -20,9 +20,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService implements CreateUserUseCase, ReadUserUseCase, UpdateUserUseCase, DeleteUserUseCase, ValidateUserUseCase{
 
@@ -40,6 +42,7 @@ public class UserService implements CreateUserUseCase, ReadUserUseCase, UpdateUs
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetailResult getUserDetail(ReadUserCommand cmd) {
         log.info("유저 상세 정보 조회! user id: {}", cmd.userId());
 
@@ -105,6 +108,7 @@ public class UserService implements CreateUserUseCase, ReadUserUseCase, UpdateUs
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UniqueCheckResult isUnique(UniqueCheckCommand cmd) {
         boolean exist = userRepository.findByField(cmd.field(), cmd.value());
         String message = exist ? "이미 사용중인 " + cmd.field() + "입니다." : "사용 가능한 " + cmd.field() + "입니다.";
@@ -112,6 +116,7 @@ public class UserService implements CreateUserUseCase, ReadUserUseCase, UpdateUs
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LoginValidationResult validate(LoginValidationCommand cmd) {
         try {
 
@@ -174,6 +179,7 @@ public class UserService implements CreateUserUseCase, ReadUserUseCase, UpdateUs
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean checkPassword(Long userId, String password) {
         log.info("유저 패스워드 체크! user id: {}", userId);
 
