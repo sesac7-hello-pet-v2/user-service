@@ -18,6 +18,10 @@ public class UserDetail {
     private Long id;
 
     @Getter
+    @Column(nullable = false)
+    private String username;
+
+    @Getter
     @Column(unique = true)
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "nickname_value"))
@@ -30,6 +34,7 @@ public class UserDetail {
     @Column(nullable = false)
     private String address;
 
+    @Getter
     @Column(unique = true)
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "phone_value"))
