@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+*.yml
+*.yaml
+
+# GitHub Actions 워크플로우는 추적
+!.github/workflows/*.yml
+!.github/workflows/*.yaml
