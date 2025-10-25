@@ -38,7 +38,6 @@ public class InternalUserController {
 
     @GetMapping(
             value = "/{userId}",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<UserDetailResponse> getUserDetail(@PathVariable Long userId) {
